@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<meta name="description" content="SZC Studio — offline-first SZC development environment for iPad.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./assets/icon-192.png">
+<title>SZC Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#101114;--panel:#181a1f;--panel2:#20232a;--line:#30343d;--text:#f2f3f5;--muted:#9da3ad;--accent:#a8d5ff;--green:#a5e5bd;--danger:#ffaaa7;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);height:100dvh;overflow:hidden}
+button,input,textarea{font:inherit}button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:10px 13px;cursor:pointer}button.primary{background:#e8eef7;color:#101114;border-color:#e8eef7;font-weight:700}button:active{transform:scale(.98)}button:disabled{opacity:.4}
+.top{height:60px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--line);background:#14161a}
+.brand{font-weight:800;letter-spacing:.12em;font-size:17px}.brand small{display:block;font-size:9px;letter-spacing:.18em;color:var(--muted);font-weight:500;margin-top:2px}
+.topright{margin-left:auto;display:flex;gap:8px;align-items:center}.status{font-size:11px;color:var(--green);white-space:nowrap}
+.layout{height:calc(100dvh - 60px);display:grid;grid-template-columns:250px minmax(300px,1fr) minmax(320px,42%);min-height:0}
+.sidebar{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.sidehead,.panehead{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 13px;border-bottom:1px solid var(--line);font-size:12px;font-weight:700;letter-spacing:.06em}
+.project{padding:13px;border-bottom:1px solid var(--line)}.project input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:9px}
+.filelist{padding:10px;overflow:auto;flex:1}.file{width:100%;text-align:left;display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:10px;border-radius:8px;color:var(--muted)}.file.active{background:#2b3039;color:white}
+.sideactions{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px;border-top:1px solid var(--line)}.sideactions button{font-size:11px}
+.editorpane,.previewpane{min-width:0;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+.editorpane{border-right:1px solid var(--line)}.panehead{background:var(--panel)}
+.editorwrap{position:relative;flex:1;min-height:0;overflow:hidden;background:#111318}
+#editor{width:100%;height:100%;resize:none;border:0;outline:0;background:transparent;color:#e7e9ed;padding:18px 18px 80px;font:14px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:4;white-space:pre;overflow:auto;caret-color:#a8d5ff}
+.editorfoot{height:34px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px;color:var(--muted);font-size:10px}
+.previewtools{display:flex;gap:6px}.previewtools button{padding:6px 9px;font-size:11px}
+#preview{border:0;background:white;flex:1;width:100%;min-height:0}
+.output{height:125px;overflow:auto;border-top:1px solid var(--line);background:#14161a;padding:10px 13px;font:11px/1.6 ui-monospace,monospace;color:var(--muted)}
+.output strong{color:var(--text)}.ok{color:var(--green)}.err{color:var(--danger)}
+.mobiletabs{display:none}
+.modalback{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:18px;z-index:20}.modal{max-width:520px;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-height:85dvh;overflow:auto}.modal h2{margin:0 0 12px}.modal p,.modal li{color:var(--muted);font-size:13px;line-height:1.6}.modalclose{float:right}
+@media(max-width:900px){.layout{grid-template-columns:190px minmax(280px,1fr)}.previewpane{display:none}.layout.showpreview{grid-template-columns:190px 1fr}.layout.showpreview .editorpane{display:none}.layout.showpreview .previewpane{display:flex}}
+@media(max-width:650px){.layout{display:block;position:relative}.sidebar{display:none}.editorpane,.previewpane{height:100%}.previewpane{display:none}.layout.showpreview .editorpane{display:none}.layout.showpreview .previewpane{display:flex}.top{height:56px;padding:0 10px}.top .status{display:none}.top button{padding:8px;font-size:11px}.mobiletabs{display:flex;position:fixed;bottom:0;left:0;right:0;height:52px;background:#17191e;border-top:1px solid var(--line);z-index:5;justify-content:space-around;align-items:center;padding-bottom:env(safe-area-inset-bottom)}.mobiletabs button{border:0;background:transparent;font-size:11px}.editorfoot{margin-bottom:52px}.output{height:105px}.layout{height:calc(100dvh - 56px)}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">SZC <small>STUDIO · IPAD EDITION</small></div>
+  <div class="topright">
+    <span class="status" id="onlineStatus">● Ready</span>
+    <button id="helpBtn">Help</button>
+    <button id="exportBtn">Export ZIP</button>
+    <button class="primary" id="runBtn">▶ Run</button>
+  </div>
+</header>
+<main class="layout" id="layout">
+  <aside class="sidebar">
+    <div class="sidehead"><span>EXPLORER</span><button id="newBtn">＋</button></div>
+    <div class="project"><input id="projectName" value="My SZC Project" aria-label="Project name"></div>
+    <div class="filelist" id="filelist"></div>
+    <div class="sideactions">
+      <button id="importBtn">Import .szc</button><button id="newFileBtn">New file</button>
+      <button id="downloadBtn">Download .szc</button><button id="zipBtn">Project ZIP</button>
+    </div>
+  </aside>
+  <section class="editorpane">
+    <div class="panehead"><span id="filename">main.szc</span><span id="saveState">LOCAL</span></div>
+    <div class="editorwrap"><textarea id="editor" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-label="SZC code editor"></textarea></div>
+    <div class="editorfoot"><span id="cursorInfo">Line 1 · Column 1</span><span>SZC SOURCE · UTF-8</span></div>
+    <div class="output" id="output"><strong>Build output</strong><br>Ready. Press Run to compile your SZC program.</div>
+  </section>
+  <section class="previewpane">
+    <div class="panehead"><span>LIVE PREVIEW</span><div class="previewtools"><button id="refreshBtn">↻ Refresh</button><button id="fullBtn">↗ Open</button></div></div>
+    <iframe id="preview" title="Compiled SZC website preview" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
+  </section>
+</main>
+<nav class="mobiletabs">
+  <button id="filesTab">▤ Files</button><button id="codeTab">⌘ Code</button><button id="previewTab">▣ Preview</button><button id="runTab">▶ Run</button>
+</nav>
+<input id="fileInput" type="file" accept=".szc,text/plain" hidden>
+<div class="modalback" id="helpModal"><div class="modal">
+<button class="modalclose" id="closeHelp">Close</button><h2>Welcome to SZC Studio</h2>
+<p>SZC Studio is an offline-first editor and compiler workspace for the current SZC language prototype.</p>
+<h3>Quick start</h3>
+<ol><li>Edit the example in <code>main.szc</code>.</li><li>Press Run to compile it.</li><li>View the result in Preview.</li><li>Download your source or export the project ZIP.</li></ol>
+<h3>Example syntax</h3>
+<pre>Create website "My Website"
+Set page background to #f4f5f7
+Create button "Get Started" as start
+Style start:
+    background: #151515
+    text color: white
+    width: 200px
+    height: 55px
+    corner radius: 14px
+    position: fixed
+    left: 15px
+    bottom: 20px
+When start is clicked:
+    Show message "Hello from SZC!"</pre>
+<p><strong>Offline note:</strong> After the app has been installed and cached, its editor and compiler work offline. Installing as a PWA requires an initial secure HTTPS visit. iPad Safari can also open local project files through Files.</p>
+</div></div>
+<script type="module" src="./src/app.js"></script>
+</body></html>
